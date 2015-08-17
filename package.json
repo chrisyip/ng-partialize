@@ -1,0 +1,28 @@
+{
+  "name": "ng-partialize",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "example": "example"
+  },
+  "devDependencies": {
+    "eslint": "^1.1.0",
+    "uglify-js": "^2.4.24"
+  },
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint .",
+    "uglify": "mkdir -p dist && ./node_modules/.bin/uglifyjs index.js -o dist/ng-partialize.min.js --source-map dist/ng-partialize.min.js.map --source-map-url=ng-partialize.min.js.map --source-map-include-sources --comments",
+    "test": "npm run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrisyip/ng-partialize.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chrisyip/ng-partialize/issues"
+  },
+  "homepage": "https://github.com/chrisyip/ng-partialize#readme"
+}
