@@ -9,8 +9,16 @@
     throw new Error('Cannot found angular, make sure angular is attached to global object')
   }
 
-  function getDeps ($injector, $scope, factoryFunction) {
-    var annotation = $injector.annotate(factoryFunction)
+  function inject (context, $injector, $scope, factoryFunction) {
+    var annotation
+
+    if (angular.isFunction(factoryFunction)) {
+      annotation = $injector.annotate(factoryFunction)
+    } else if (angular.isArray(factoryFunction)) {
+      annotation = factoryFunction.slice(0, factoryFunction.length - 1)
+      factoryFunction = factoryFunction[factoryFunction.length - 1]
+    }
+
     var deps = []
 
     angular.forEach(annotation, function (name) {
@@ -21,33 +29,31 @@
       }
     })
 
-    return deps
+    factoryFunction.apply(context, deps)
   }
 
   function controllerWrapper (module, name, context, factoryFunction) {
     var factory = ['$injector', '$scope']
 
-    if (angular.isFunction(factoryFunction)) {
-      factory.push(function ($injector, $scope) {
-        var before = module._beforeControllers[name]
+    factory.push(function ($injector, $scope) {
+      var before = module._beforeControllers[name]
 
-        if (angular.isArray(before)) {
-          angular.forEach(before, function (factory) {
-            factory.apply(context, getDeps($injector, $scope, factory))
-          })
-        }
+      if (angular.isArray(before)) {
+        angular.forEach(before, function (factory) {
+          inject(context, $injector, $scope, factory)
+        })
+      }
 
-        factoryFunction.apply(context, getDeps($injector, $scope, factoryFunction))
+      inject(context, $injector, $scope, factoryFunction)
 
-        var after = module._afterControllers[name]
+      var after = module._afterControllers[name]
 
-        if (angular.isArray(after)) {
-          angular.forEach(after, function (factory) {
-            factory.apply(context, getDeps($injector, $scope, factory))
-          })
-        }
-      })
-    }
+      if (angular.isArray(after)) {
+        angular.forEach(after, function (factory) {
+          inject(context, $injector, $scope, factory)
+        })
+      }
+    })
 
     return factory
   }
